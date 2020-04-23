@@ -2,7 +2,7 @@
 Aulas de Sistemas Operativos da turma LI41D no verão de 2019/2020
 
 ### Aulas Remotas Gravadas
-* [Educast](https://educast.fccn.pt/vod/channels/k0qyf9ml5)
+* [Educast](https://educast.fccn.pt/vod/channels/k0qyf9ml5) ([link alternativo](https://portal.educast.fccn.pt/videos?c=5725))
 
 ### Aulas Remotas
 * 3ªs feiras (11h00 .. 14h00) : [Join Zoom](https://videoconf-colibri.zoom.us/j/878735917)
