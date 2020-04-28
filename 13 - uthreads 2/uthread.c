@@ -1,6 +1,8 @@
 #include <stdint.h>
+#include <stdlib.h>
 
-#include "include/list.h"
+#include "list.h"
+#include "uthread.h"
 
 #define STACK_SIZE (8*4096)
 
@@ -59,14 +61,26 @@ void ut_init() {
 }
 
 void ut_run() {
+	UTHREAD thread;
 	
+	if (isListEmpty(&ready_queue)) {
+		return;
+	}
+	
+	main_thread = &thread;
+	
+	PUTHREAD first_thread = extract_next_ready_thread();
+	context_switch(main_thread, first_thread);
+
+	main_thread = NULL;
+	running_thread = NULL;
 }
 
 void ut_end() {
 	// nothing to do
 }
 
-void ut_create(void *(*start_routine) (void *), void *arg) {
+void ut_create(void (*start_routine) (void *), void *arg) {
 	
 	PUTHREAD thread = (PUTHREAD)malloc(sizeof (UTHREAD));
 	thread->stack = malloc(STACK_SIZE);
@@ -91,6 +105,8 @@ void ut_create(void *(*start_routine) (void *), void *arg) {
 	
 	context->ret_addr = internal_start;
 	
+	thread->sp = (uint64_t)context;
+	
 	number_of_threads += 1;
 	insertTailList(&ready_queue, &(thread->node));
 }
@@ -102,5 +118,9 @@ void ut_exit() {
 }
 
 void ut_yield() {
-	
+	if (!isListEmpty(&ready_queue)) {
+		insertTailList(&ready_queue, &(running_thread->node));
+		PUTHREAD next_thread = extract_next_ready_thread();
+		context_switch(running_thread, next_thread);
+	}
 }
