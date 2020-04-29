@@ -26,12 +26,14 @@ void f3(void * arg) {
 
 int main() {
 	ut_init();
-	
+
 	ut_create(f1, "t1");
 	ut_create(f2, NULL);
 	ut_create(f3, "t3");
-	
+
+	printf(":: START ::\n");
 	ut_run();
+	printf(":: END ::\n");
 	
 	ut_end();
 	return 0;

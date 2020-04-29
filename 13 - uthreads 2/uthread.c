@@ -14,13 +14,13 @@ typedef struct uthread_context {
 	uint64_t rbx;
 	uint64_t rbp;
 	void (*ret_addr)();
-} UTHREAD_CONTEXT, * PUTHREAD_CONTEXT;
+} UTHREAD_CONTEXT, *PUTHREAD_CONTEXT;
 
 typedef struct uthread {
 	uint64_t   sp; // fixed at offset 0 (do not move) [see ctxsw.s]
 	void *     stack;
 	LIST_ENTRY node;
-	void     (*start_routine)(void*);
+	void     (*start_routine)(void *);
 	void *     argument;
 } UTHREAD, *PUTHREAD;
 
@@ -30,10 +30,13 @@ static LIST_ENTRY ready_queue;
 
 PUTHREAD running_thread;
 
-PUTHREAD main_thread;
+static PUTHREAD main_thread;
 
 static void internal_start() {
+	// call thread function with argument
 	running_thread->start_routine(running_thread->argument);
+
+	// cleanup thread
 	ut_exit(); // never returns
 }
 
@@ -46,6 +49,7 @@ void cleanup_thread(PUTHREAD thread) {
 	free(thread);
 }
 
+__attribute__((always_inline))
 static inline PUTHREAD extract_next_ready_thread() {
 	if (isListEmpty(&ready_queue)) {
 		return main_thread;
@@ -60,6 +64,10 @@ void ut_init() {
 	initializeListHead(&ready_queue);
 }
 
+void ut_end() {
+	// nothing to do
+}
+
 void ut_run() {
 	UTHREAD thread;
 	
@@ -72,12 +80,7 @@ void ut_run() {
 	PUTHREAD first_thread = extract_next_ready_thread();
 	context_switch(main_thread, first_thread);
 
-	main_thread = NULL;
-	running_thread = NULL;
-}
-
-void ut_end() {
-	// nothing to do
+	main_thread = running_thread = NULL;
 }
 
 void ut_create(void (*start_routine) (void *), void *arg) {
@@ -95,7 +98,7 @@ void ut_create(void (*start_routine) (void *), void *arg) {
 			- sizeof (uint64_t) * 5
 			- sizeof (UTHREAD_CONTEXT)
 		);
-		
+
 	context->r15 = 0x5555555555555555;
 	context->r14 = 0x4444444444444444;
 	context->r13 = 0x3333333333333333;
