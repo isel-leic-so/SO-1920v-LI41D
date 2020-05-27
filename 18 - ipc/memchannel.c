@@ -55,9 +55,11 @@ void mc_close(memch_t * mc) {
 }
 
 void mc_destroy(memch_t * mc) {
+	char name[MEMCH_MAX_NAME_LEN];
+	strcpy(name, mc->name);
 	size_t data_size = mc->elem_size * mc->capacity;
 	size_t mc_size = sizeof (memch_t) + data_size;
 	sem_destroy(&(mc->has_items));
 	sem_destroy(&(mc->has_space));
-	shmem_destroy(mc->name, mc, mc_size);
+	shmem_destroy(name, mc, mc_size);
 }
